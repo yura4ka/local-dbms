@@ -1,0 +1,20 @@
+﻿<Window x:Class="local_dbms.dialogs.CreateDatabaseDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:local_dbms.dialogs"
+        mc:Ignorable="d"
+        Title="Create Database"
+        MinHeight="50"
+        MinWidth="300"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="10">
+        <TextBlock Text="Database Name:"/>
+        <TextBox x:Name="DatabaseNameTextBox" Margin="0,5,0,10"/>
+        <Button Content="Create" Click="CreateButton_Click"/>
+    </StackPanel>
+</Window>
