@@ -1,8 +1,6 @@
 ﻿using local_dbms.core;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace local_dbms.windows.DatabaseWindow
 {
@@ -11,11 +9,17 @@ namespace local_dbms.windows.DatabaseWindow
 	/// </summary>
 	public partial class DatabaseWindow : Window
 	{
-		private IDatabase _database;
+		private readonly IDatabase _database;
+		private readonly TablePanelController _tablePanelController;
+
 		public DatabaseWindow(string connectionString)
 		{
 			InitializeComponent();
+
+			_tablePanelController = new TablePanelController();
 			_database = new SqliteDatabase(connectionString);
+
+			TableDataGrid.ItemsSource = _tablePanelController.Data.DefaultView;
 			PopulateTreeView();
 		}
 
@@ -23,7 +27,6 @@ namespace local_dbms.windows.DatabaseWindow
 		{
 			foreach (var table in _database.Tables)
 			{
-				Debug.WriteLine(table.Name);
 				var treeViewItem = new TreeViewItem
 				{
 					Header = table.Name,
@@ -48,67 +51,19 @@ namespace local_dbms.windows.DatabaseWindow
 		{
 			TablePanel.Visibility = Visibility.Visible;
 			TableHeader.Text = selectedTable.Name;
-			TableDataGrid.Columns.Clear();
-			selectedTable.GetAllRows();
 
-			for (int i = 0; i < selectedTable.Columns.Count; i++)
-			{
-				var column = selectedTable.Columns[i];
-				string headerText = column.Name;
-				if (column.IsPk) headerText += " (pk)";
-				else if (column.IsNotNull) headerText += " (nn)";
-
-				var dataGridColumn = new DataGridTextColumn
-				{
-					Header = headerText,
-					Binding = new System.Windows.Data.Binding($"[{i}].StringValue")
-				};
-
-				TableDataGrid.Columns.Add(dataGridColumn);
-			}
-
-			var actionsColumn = new DataGridTemplateColumn
-			{
-				Header = "Actions",
-				CellTemplate = CreateSaveButtonTemplate()
-			};
-			TableDataGrid.Columns.Add(actionsColumn);
-
-			TableDataGrid.ItemsSource = selectedTable.Rows;
-			TableDataGrid.RowStyle = CreateRowStyle();
+			_tablePanelController.SetTableData(selectedTable);
 		}
 
-		private DataTemplate CreateSaveButtonTemplate()
+		private void TableDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
 		{
-			var buttonFactory = new FrameworkElementFactory(typeof(Button));
-			buttonFactory.SetValue(Button.ContentProperty, "Save");
-			buttonFactory.SetValue(Button.IsEnabledProperty, new System.Windows.Data.Binding("CanBeSaved"));
-			buttonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(SaveButton_Click));
+			var rowIndex = e.Row.GetIndex();
+			var columnIndex = e.Column.DisplayIndex;
+			var editingElement = e.EditingElement as TextBox;
+			string? newValue = editingElement?.Text;
+			if (newValue == null) return;
 
-			return new DataTemplate { VisualTree = buttonFactory };
-		}
-
-		private void SaveButton_Click(object sender, RoutedEventArgs e)
-		{
-			if (sender is Button button && button.DataContext is Row row)
-			{
-				Debug.WriteLine(row[0].StringValue);
-			}
-		}
-
-		private Style CreateRowStyle()
-		{
-			var style = new Style(typeof(DataGridRow));
-
-			var trigger = new DataTrigger
-			{
-				Binding = new System.Windows.Data.Binding("IsValid"),
-				Value = false
-			};
-			trigger.Setters.Add(new Setter(BackgroundProperty, Brushes.Red));
-			style.Triggers.Add(trigger);
-
-			return style;
+			_tablePanelController.OnChange(rowIndex, columnIndex, newValue);
 		}
 
 		private void DisplayColumnData(Column selectedColumn)

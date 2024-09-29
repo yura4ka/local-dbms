@@ -26,11 +26,11 @@ namespace local_dbms.core
 			using var reader = command.ExecuteReader();
 			while (reader.Read())
 			{
-				var rowValues = new IColumnValue[table.Columns.Count];
+				var rowValues = new ColumnValue[table.Columns.Count];
 				for (int i = 0; i < rowValues.Length; i++)
 				{
 					var value = reader.GetString(i);
-					rowValues[i] = table.Columns[i].Type.Instance(value);
+					rowValues[i] = table.Columns[i].Type.Instance(value, !table.Columns[i].IsNotNull);
 				}
 				result.Add(new Row(rowValues));
 			}

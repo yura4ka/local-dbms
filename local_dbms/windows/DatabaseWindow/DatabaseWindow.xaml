@@ -23,9 +23,7 @@
         <StackPanel Grid.Column="1" Margin="10">
             <StackPanel x:Name="TablePanel" Visibility="Collapsed">
                 <TextBlock FontWeight="Bold" FontSize="16" x:Name="TableHeader" />
-                <DataGrid x:Name="TableDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" Margin="0,5,0,0">
-                    <DataGrid.Columns>
-                    </DataGrid.Columns>
+                <DataGrid x:Name="TableDataGrid" CellEditEnding="TableDataGrid_CellEditEnding" CanUserAddRows="False" SelectionUnit="Cell" SelectionMode="Single" Margin="0,5,0,0">
                 </DataGrid>
             </StackPanel>
 

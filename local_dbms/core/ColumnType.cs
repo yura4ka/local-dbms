@@ -3,7 +3,7 @@
 	internal interface IColumnType
 	{
 		public abstract string Name { get; }
-		public abstract IColumnValue Instance(object value);
+		public abstract ColumnValue Instance(object value, bool isNullable);
 	}
 
 	internal sealed class IntType : IColumnType
@@ -20,9 +20,9 @@
 
 		public string Name => "Int";
 
-		public IColumnValue Instance(object value)
+		public ColumnValue Instance(object value, bool isNullable)
 		{
-			return new IntValue(value);
+			return new IntValue(value, isNullable);
 		}
 	}
 
@@ -40,9 +40,9 @@
 
 		public string Name => "Text";
 
-		public IColumnValue Instance(object value)
+		public ColumnValue Instance(object value, bool isNullable)
 		{
-			return new TextValue(value);
+			return new TextValue(value, isNullable);
 		}
 	}
 

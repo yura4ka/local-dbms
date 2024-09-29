@@ -9,7 +9,7 @@
     <Grid>
         <StackPanel>
             <Button Content="Create Database" Click="CreateDatabaseButton_Click" Margin="10" Width="300"/>
-            <DataGrid x:Name="DbFilesDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" Margin="10">
+            <DataGrid x:Name="DbFilesDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" Margin="10">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
                     <DataGridTemplateColumn Header="Actions">
