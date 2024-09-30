@@ -1,6 +1,5 @@
 ﻿using local_dbms.core;
 using System.Data;
-using System.Data.Common;
 
 namespace local_dbms.windows.DatabaseWindow
 {
@@ -30,18 +29,27 @@ namespace local_dbms.windows.DatabaseWindow
 				var dataRow = Data.NewRow();
 				for (int i = 0; i < selectedTable.Columns.Count; i++)
 				{
-					dataRow[i] = row[i];
+					dataRow[i] = row[i].StringValue;
 				}
 				Data.Rows.Add(dataRow);
 			}
 		}
 
-		public void OnChange(int row, int column, string value)
+		public bool OnChange(int row, int column, string value)
 		{
-			if (SelectedTable == null) return;
+			if (SelectedTable == null) return false;
+			bool isValid;
 
-			bool isValid = SelectedTable.Rows[row].UpdateValue(column, value);
-			Data.Rows[row][column] = SelectedTable.Rows[row][column];
+			try
+			{
+				isValid = SelectedTable.ChangeCell(row, column, value);
+			}
+			finally
+			{
+				Data.Rows[row][column] = SelectedTable.Rows[row][column].StringValue;
+			}
+
+			return isValid;
 		}
 	}
 }

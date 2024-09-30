@@ -63,14 +63,22 @@ namespace local_dbms.windows.DatabaseWindow
 			string? newValue = editingElement?.Text;
 			if (newValue == null) return;
 
-			_tablePanelController.OnChange(rowIndex, columnIndex, newValue);
+			try
+			{
+				bool isValid = _tablePanelController.OnChange(rowIndex, columnIndex, newValue);
+				if (!isValid) ShowErrorMessage("Wrong value");
+		}
+			catch (Exception ex)
+			{
+				ShowErrorMessage(ex.Message);
+			}
 		}
 
 		private void DisplayColumnData(Column selectedColumn)
 		{
 			ColumnPanel.Visibility = Visibility.Visible;
 			ColumnHeader.Text = selectedColumn.Name;
-			ColumnDetails.Text = $"Data Type: {selectedColumn.Type}\nDescription: {selectedColumn.Type}";
+			ColumnDetails.Text = $"Data Type: {selectedColumn.Type.Name}";
 		}
 
 		private void DatabaseTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -85,6 +93,11 @@ namespace local_dbms.windows.DatabaseWindow
 				else if (selectedItem.Tag is Column selectedColumn)
 					DisplayColumnData(selectedColumn);
 			}
+		}
+
+		private void ShowErrorMessage(string error)
+		{
+			MessageBox.Show(error, "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 	}
 }

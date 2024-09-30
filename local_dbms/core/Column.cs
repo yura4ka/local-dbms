@@ -1,6 +1,6 @@
 ﻿namespace local_dbms.core
 {
-	internal class Column
+	public class Column
 	{
 		private string _name;
 		private IColumnType _type;

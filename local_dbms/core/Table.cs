@@ -28,5 +28,30 @@
 		{
 			_rows = _tableController.GetAllRows(this);
 		}
+
+		public bool ChangeCell(int row, int column, string value)
+		{
+			bool isValid;
+			bool isPk = _columns[column].IsPk;
+			var originalValue = _rows[row][column].ObjectValue;
+
+			if (isPk)
+			{
+				var columnValue = _columns[column].Type.Instance(null, false);
+				if (!columnValue.SetFromString(value)) return false;
+				isValid = _tableController.ChangePrimaryKey(this, row, column, columnValue.ObjectValue);
+				if (isValid) _rows[row][column].SetFromString(value);
+			}
+			else
+			{
+				isValid = _rows[row][column].SetFromString(value);
+				if (!isValid) return false;
+				isValid = _tableController.SaveCell(this, row, column);
+				if (!isValid) _rows[row][column].SetFromObject(originalValue);
+			}
+
+
+			return isValid;
+		}
 	}
 }

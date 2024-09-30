@@ -1,12 +1,10 @@
-﻿using System.Diagnostics;
-
-namespace local_dbms.core
+﻿namespace local_dbms.core
 {
-	internal abstract class ColumnValue
+	public abstract class ColumnValue
 	{
 		protected readonly bool _isNullable;
 
-		public ColumnValue(object value, bool isNullable)
+		public ColumnValue(object? value, bool isNullable)
 		{
 			_isNullable = isNullable;
 			SetFromObject(value);
@@ -15,22 +13,25 @@ namespace local_dbms.core
 		public bool IsNullable => _isNullable;
 
 		public abstract string StringValue { get; }
+		public abstract object? ObjectValue { get; }
 		public abstract bool IsNull { get; }
-		public abstract bool SetFromObject(object value);
+		public abstract bool SetFromObject(object? value);
 		public abstract bool SetFromString(string value);
 	}
 
-	internal class IntValue : ColumnValue
+	public class IntValue : ColumnValue
 	{
 		private int? _value = null;
 
-		public IntValue(object value, bool isNullable) : base(value, isNullable) { }
+		public IntValue(object? value, bool isNullable) : base(value, isNullable) { }
 
 		public override bool IsNull => _value == null;
 
 		public override string StringValue => _value?.ToString() ?? "";
 
-		public override bool SetFromObject(object value)
+		public override object? ObjectValue => _value;
+
+		public override bool SetFromObject(object? value)
 		{
 			if (value == null)
 			{
@@ -60,30 +61,35 @@ namespace local_dbms.core
 		}
 	}
 
-	internal class TextValue : ColumnValue
+	public class TextValue : ColumnValue
 	{
 		private string? _value = null;
 
-		public TextValue(object value, bool isNullable) : base(value, isNullable) { }
+		public TextValue(object? value, bool isNullable) : base(value, isNullable) { }
 
 		public override bool IsNull => _value == null;
 
-		public override string StringValue => _value == null ? "null value" : $"'{_value}'";
+		public override string StringValue => _value == null ? "null" : $"'{_value}'";
 
-		public override bool SetFromObject(object value)
+		public override object? ObjectValue => _value;
+
+		public override bool SetFromObject(object? value)
 		{
 			if (value == null)
 			{
 				if (_isNullable) _value = null;
 				return _isNullable;
 			}
-			if (value is string strValue) return SetFromString(strValue);
+			if (value is string strValue)
+			{
+				_value = strValue;
+				return true;
+			}
 			return false;
 		}
 
 		public override bool SetFromString(string value)
 		{
-			Debug.WriteLine($"Set from string: {value}");
 			if (value.Equals("null", StringComparison.CurrentCultureIgnoreCase))
 			{
 				if (_isNullable) _value = null;
