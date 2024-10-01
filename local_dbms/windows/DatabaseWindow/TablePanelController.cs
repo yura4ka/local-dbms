@@ -56,6 +56,13 @@ namespace local_dbms.windows.DatabaseWindow
 			return isValid;
 		}
 
+		public void DeleteRow(int row)
+		{
+			if (SelectedTable == null) return;
+			SelectedTable.DeleteRow(row);
+			Data.Rows.RemoveAt(row);
+		}
+
 		private void AddDataRow(Row row)
 		{
 			var dataRow = Data.NewRow();

@@ -5,9 +5,10 @@ namespace local_dbms.core
 	internal interface ITableController
 	{
 		public List<Row> GetAllRows(Table table);
-		public bool SaveCell(Table table, int row, int column);
-		public bool ChangePrimaryKey(Table table, int row, int column, object? newPk);
-		public bool AddRow(Table table, Row row);
+		public bool UpdateCell(Table table, int row, int column);
+		public bool UpdatePrimaryKey(Table table, int row, int column, object? newPk);
+		public bool InsertRow(Table table, Row row);
+		public void DeleteRow(Table table, int row);
 	}
 
 	internal class SqliteTableController : ITableController
@@ -40,23 +41,17 @@ namespace local_dbms.core
 			return result;
 		}
 
-		public bool SaveCell(Table table, int row, int column)
+		public bool UpdateCell(Table table, int row, int column)
 		{
-			int pkIndex = table.Columns.FindIndex(c => c.IsPk);
-			if (pkIndex == -1)
-				throw new PkNotFoundException(table.Name);
-
-			string pkColumnName = table.Columns[pkIndex].Name;
-			object? pkValue = table.Rows[row][pkIndex].ObjectValue;
-
+			var pk = GetPk(table, row);
 			string columnName = table.Columns[column].Name;
 			object? value = table.Rows[row][column].ObjectValue;
 
-			var command = CreateUpdateCommand(table.Name, columnName, pkColumnName, value, pkValue);
+			var command = CreateUpdateCommand(table.Name, columnName, pk.Name, value, pk.Value);
 			return command.ExecuteNonQuery() == 1;
 		}
 
-		public bool ChangePrimaryKey(Table table, int row, int column, object? newPk)
+		public bool UpdatePrimaryKey(Table table, int row, int column, object? newPk)
 		{
 			string columnName = table.Columns[column].Name;
 			object? oldPk = table.Rows[row][column].ObjectValue;
@@ -65,7 +60,7 @@ namespace local_dbms.core
 			return command.ExecuteNonQuery() == 1;
 		}
 
-		public bool AddRow(Table table, Row row)
+		public bool InsertRow(Table table, Row row)
 		{
 			var columns = table.Columns.Select(c => c.Name);
 			var values = row.Select(c => c.ObjectValue).ToList();
@@ -79,6 +74,27 @@ namespace local_dbms.core
 			return command.ExecuteNonQuery() == 1;
 		}
 
+		public void DeleteRow(Table table, int row)
+		{
+			var pk = GetPk(table, row);
+
+			var command = _connection.CreateCommand();
+			command.CommandText = $"DELETE FROM {table.Name} WHERE {pk.Name} = $id;";
+			command.Parameters.AddWithValue("$id", pk.Value);
+			command.ExecuteNonQuery();
+		}
+
+		private static PkData GetPk(Table table, int row)
+		{
+			int pkIndex = table.Columns.FindIndex(c => c.IsPk);
+			if (pkIndex == -1)
+				throw new PkNotFoundException(table.Name);
+			var pkName = table.Columns[pkIndex].Name;
+			var pkValue = table.Rows[row][pkIndex].ObjectValue;
+
+			return new PkData(pkIndex, pkName, pkValue);
+		}
+
 		private SqliteCommand CreateUpdateCommand(string tableName, string columnName, string pkColumnName, object? newValue, object? pkValue)
 		{
 			var command = _connection.CreateCommand();
@@ -88,4 +104,6 @@ namespace local_dbms.core
 			return command;
 		}
 	}
+
+	internal readonly record struct PkData(int Index, string Name, object? Value);
 }

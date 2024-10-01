@@ -39,14 +39,14 @@
 			{
 				var columnValue = _columns[column].Type.Instance(null, false);
 				if (!columnValue.ParseString(value)) return false;
-				isValid = _tableController.ChangePrimaryKey(this, row, column, columnValue.ObjectValue);
+				isValid = _tableController.UpdatePrimaryKey(this, row, column, columnValue.ObjectValue);
 				if (isValid) _rows[row][column].ParseString(value);
 			}
 			else
 			{
 				isValid = _rows[row][column].ParseString(value);
 				if (!isValid) return false;
-				isValid = _tableController.SaveCell(this, row, column);
+				isValid = _tableController.UpdateCell(this, row, column);
 				if (!isValid) _rows[row][column].SetFromObject(originalValue);
 			}
 
@@ -56,9 +56,15 @@
 
 		public bool AddRow(Row row)
 		{
-			bool isValid = _tableController.AddRow(this, row);
+			bool isValid = _tableController.InsertRow(this, row);
 			if (isValid) _rows.Add(row);
 			return isValid;
+		}
+
+		public void DeleteRow(int row)
+		{
+			_tableController.DeleteRow(this, row);
+			_rows.RemoveAt(row);
 		}
 	}
 }

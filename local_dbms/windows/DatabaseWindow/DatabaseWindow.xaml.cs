@@ -1,5 +1,6 @@
 ﻿using local_dbms.core;
 using local_dbms.utils;
+using System.Data;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -80,6 +81,24 @@ namespace local_dbms.windows.DatabaseWindow
 			ColumnPanel.Visibility = Visibility.Visible;
 			ColumnHeader.Text = selectedColumn.Name;
 			ColumnDetails.Text = $"Data Type: {selectedColumn.Type.Name}";
+		}
+
+		private void DeleteRow_Click(object sender, RoutedEventArgs e)
+		{
+			if (!(sender is Button button && button.Tag is DataRowView rowView)) return;
+
+			int rowIndex = TableDataGrid.Items.IndexOf(rowView);
+			var result = MessageBox.Show("Are you sure you want to delete the row? This action cannot be undone.", "Delete row", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+			if (result != MessageBoxResult.Yes) return;
+
+			try
+			{
+				_tablePanelController.DeleteRow(rowIndex);
+			}
+			catch (Exception ex)
+			{
+				WindowUtils.ShowErrorMessage(ex.Message);
+			}
 		}
 
 		private void DatabaseTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
