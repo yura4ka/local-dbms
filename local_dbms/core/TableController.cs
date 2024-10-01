@@ -1,6 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
 
-
 namespace local_dbms.core
 {
 	internal interface ITableController
@@ -8,6 +7,7 @@ namespace local_dbms.core
 		public List<Row> GetAllRows(Table table);
 		public bool SaveCell(Table table, int row, int column);
 		public bool ChangePrimaryKey(Table table, int row, int column, object? newPk);
+		public bool AddRow(Table table, Row row);
 	}
 
 	internal class SqliteTableController : ITableController
@@ -52,7 +52,7 @@ namespace local_dbms.core
 			string columnName = table.Columns[column].Name;
 			object? value = table.Rows[row][column].ObjectValue;
 
-			var command = _createUpdateCommand(table.Name, columnName, pkColumnName, value, pkValue);
+			var command = CreateUpdateCommand(table.Name, columnName, pkColumnName, value, pkValue);
 			return command.ExecuteNonQuery() == 1;
 		}
 
@@ -61,11 +61,25 @@ namespace local_dbms.core
 			string columnName = table.Columns[column].Name;
 			object? oldPk = table.Rows[row][column].ObjectValue;
 
-			var command = _createUpdateCommand(table.Name, columnName, columnName, newPk, oldPk);
+			var command = CreateUpdateCommand(table.Name, columnName, columnName, newPk, oldPk);
 			return command.ExecuteNonQuery() == 1;
 		}
 
-		private SqliteCommand _createUpdateCommand(string tableName, string columnName, string pkColumnName, object? newValue, object? pkValue)
+		public bool AddRow(Table table, Row row)
+		{
+			var columns = table.Columns.Select(c => c.Name);
+			var values = row.Select(c => c.ObjectValue).ToList();
+			var paramNames = columns.Select(c => $"${c}").ToList();
+
+			var command = _connection.CreateCommand();
+			command.CommandText = $"INSERT INTO {table.Name} ({string.Join(',', columns)}) VALUES ({string.Join(',', paramNames)})";
+			for (int i = 0; i < values.Count; i++)
+				command.Parameters.AddWithValue(paramNames[i], values[i] ?? DBNull.Value);
+
+			return command.ExecuteNonQuery() == 1;
+		}
+
+		private SqliteCommand CreateUpdateCommand(string tableName, string columnName, string pkColumnName, object? newValue, object? pkValue)
 		{
 			var command = _connection.CreateCommand();
 			command.CommandText = $"UPDATE {tableName} SET {columnName} = $value WHERE {pkColumnName} = $id";

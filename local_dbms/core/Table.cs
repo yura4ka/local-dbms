@@ -38,19 +38,26 @@
 			if (isPk)
 			{
 				var columnValue = _columns[column].Type.Instance(null, false);
-				if (!columnValue.SetFromString(value)) return false;
+				if (!columnValue.ParseString(value)) return false;
 				isValid = _tableController.ChangePrimaryKey(this, row, column, columnValue.ObjectValue);
-				if (isValid) _rows[row][column].SetFromString(value);
+				if (isValid) _rows[row][column].ParseString(value);
 			}
 			else
 			{
-				isValid = _rows[row][column].SetFromString(value);
+				isValid = _rows[row][column].ParseString(value);
 				if (!isValid) return false;
 				isValid = _tableController.SaveCell(this, row, column);
 				if (!isValid) _rows[row][column].SetFromObject(originalValue);
 			}
 
 
+			return isValid;
+		}
+
+		public bool AddRow(Row row)
+		{
+			bool isValid = _tableController.AddRow(this, row);
+			if (isValid) _rows.Add(row);
 			return isValid;
 		}
 	}

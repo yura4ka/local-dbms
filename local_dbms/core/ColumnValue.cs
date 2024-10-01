@@ -16,7 +16,7 @@
 		public abstract object? ObjectValue { get; }
 		public abstract bool IsNull { get; }
 		public abstract bool SetFromObject(object? value);
-		public abstract bool SetFromString(string value);
+		public abstract bool ParseString(string value);
 	}
 
 	public class IntValue : ColumnValue
@@ -27,7 +27,7 @@
 
 		public override bool IsNull => _value == null;
 
-		public override string StringValue => _value?.ToString() ?? "";
+		public override string StringValue => _value?.ToString() ?? "null";
 
 		public override object? ObjectValue => _value;
 
@@ -38,7 +38,7 @@
 				if (_isNullable) _value = null;
 				return _isNullable;
 			}
-			if (value is string strValue) return SetFromString(strValue);
+			if (value is string strValue) return ParseString(strValue);
 			if (value is int intValue)
 			{
 				_value = intValue;
@@ -47,9 +47,9 @@
 			return false;
 		}
 
-		public override bool SetFromString(string value)
+		public override bool ParseString(string value)
 		{
-			if (value.Equals("null", StringComparison.CurrentCultureIgnoreCase))
+			if (string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.CurrentCultureIgnoreCase))
 			{
 				if (_isNullable) _value = null;
 				return _isNullable;
@@ -69,7 +69,7 @@
 
 		public override bool IsNull => _value == null;
 
-		public override string StringValue => _value == null ? "null" : $"'{_value}'";
+		public override string StringValue => _value == null ? "null" : $"\"{_value}\"";
 
 		public override object? ObjectValue => _value;
 
@@ -88,14 +88,14 @@
 			return false;
 		}
 
-		public override bool SetFromString(string value)
+		public override bool ParseString(string value)
 		{
-			if (value.Equals("null", StringComparison.CurrentCultureIgnoreCase))
+			if (string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.CurrentCultureIgnoreCase))
 			{
 				if (_isNullable) _value = null;
 				return _isNullable;
 			}
-			if (value.StartsWith('\'') && value.EndsWith('\''))
+			if (value.StartsWith('\"') && value.EndsWith('\"'))
 			{
 				_value = value[1..^1];
 				return true;

@@ -1,6 +1,8 @@
-﻿namespace local_dbms.core
+﻿using System.Collections;
+
+namespace local_dbms.core
 {
-	public class Row
+	public class Row : IEnumerable<ColumnValue>
 	{
 		private readonly ColumnValue[] _data;
 
@@ -10,5 +12,15 @@
 		}
 
 		public ColumnValue this[int position] => _data[position];
+
+		public IEnumerator<ColumnValue> GetEnumerator()
+		{
+			return ((IEnumerable<ColumnValue>)_data).GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return _data.GetEnumerator();
+		}
 	}
 }

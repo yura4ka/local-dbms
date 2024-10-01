@@ -39,7 +39,7 @@ namespace local_dbms.core
 					string columnName = columnReader.GetString(1);
 					string columnType = columnReader.GetString(2);
 					bool notNull = columnReader.GetBoolean(3);
-					string? defaultValue = columnReader.IsDBNull(4) ? null : columnReader.GetString(4);
+					object? defaultValue = columnReader.IsDBNull(4) ? null : columnReader.GetValue(4);
 					bool isPrimaryKey = columnReader.GetBoolean(5);
 
 					var column = new Column(columnName, TypeManager.TypeMappings[columnType](), notNull, defaultValue, isPrimaryKey);

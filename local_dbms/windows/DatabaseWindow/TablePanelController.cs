@@ -26,12 +26,7 @@ namespace local_dbms.windows.DatabaseWindow
 
 			foreach (var row in selectedTable.Rows)
 			{
-				var dataRow = Data.NewRow();
-				for (int i = 0; i < selectedTable.Columns.Count; i++)
-				{
-					dataRow[i] = row[i].StringValue;
-				}
-				Data.Rows.Add(dataRow);
+				AddDataRow(row);
 			}
 		}
 
@@ -50,6 +45,25 @@ namespace local_dbms.windows.DatabaseWindow
 			}
 
 			return isValid;
+		}
+
+		public bool AddRow(Row row)
+		{
+			if (SelectedTable == null) return false;
+
+			bool isValid = SelectedTable.AddRow(row);
+			if (isValid) AddDataRow(row);
+			return isValid;
+		}
+
+		private void AddDataRow(Row row)
+		{
+			var dataRow = Data.NewRow();
+			for (int i = 0; i < SelectedTable!.Columns.Count; i++)
+			{
+				dataRow[i] = row[i].StringValue;
+			}
+			Data.Rows.Add(dataRow);
 		}
 	}
 }

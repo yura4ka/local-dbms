@@ -1,4 +1,5 @@
 ﻿using local_dbms.core;
+using local_dbms.utils;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -66,11 +67,11 @@ namespace local_dbms.windows.DatabaseWindow
 			try
 			{
 				bool isValid = _tablePanelController.OnChange(rowIndex, columnIndex, newValue);
-				if (!isValid) ShowErrorMessage("Wrong value");
-		}
+				if (!isValid) WindowUtils.ShowErrorMessage("Wrong value");
+			}
 			catch (Exception ex)
 			{
-				ShowErrorMessage(ex.Message);
+				WindowUtils.ShowErrorMessage(ex.Message);
 			}
 		}
 
@@ -95,9 +96,11 @@ namespace local_dbms.windows.DatabaseWindow
 			}
 		}
 
-		private void ShowErrorMessage(string error)
+		private void AddButton_Click(object sender, RoutedEventArgs e)
 		{
-			MessageBox.Show(error, "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+			if (_tablePanelController.SelectedTable == null) return;
+			var dialog = new AddRowDialog(_tablePanelController.SelectedTable.Columns, _tablePanelController.AddRow);
+			dialog.ShowDialog();
 		}
 	}
 }
