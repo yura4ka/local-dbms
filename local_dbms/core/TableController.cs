@@ -2,7 +2,7 @@
 
 namespace local_dbms.core
 {
-	internal interface ITableController
+	public interface ITableController
 	{
 		public List<Row> GetAllRows(Table table);
 		public bool UpdateCell(Table table, int row, int column);

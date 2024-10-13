@@ -12,17 +12,24 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TreeView x:Name="DatabaseTreeView" SelectedItemChanged="DatabaseTreeView_SelectedItemChanged">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Columns}">
-                    <TextBlock Text="{Binding Name}" />
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <TreeView x:Name="DatabaseTreeView" SelectedItemChanged="DatabaseTreeView_SelectedItemChanged" Grid.Row="0">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Columns}">
+                        <TextBlock Text="{Binding Name}" />
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+            <Button Content="Add Table" Margin="10" Click="AddTableButton_Click" Grid.Row="1"/>
+        </Grid>
 
         <StackPanel Grid.Column="1" Margin="10">
             <StackPanel x:Name="TablePanel" Visibility="Collapsed">
-                <Button Content="Add" Click="AddButton_Click" Width="100" Margin="0, 0, 0, 5" HorizontalAlignment="Left"/>
+                <Button Content="Add" Click="AddRowButton_Click" Width="100" Margin="0, 0, 0, 5" HorizontalAlignment="Left"/>
                 <TextBlock FontWeight="Bold" FontSize="16" x:Name="TableHeader" />
                 <DataGrid x:Name="TableDataGrid" CellEditEnding="TableDataGrid_CellEditEnding" CanUserAddRows="False" SelectionUnit="Cell" SelectionMode="Single" Margin="0,5,0,0">
                     <DataGrid.Columns>

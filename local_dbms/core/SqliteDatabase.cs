@@ -10,6 +10,8 @@ namespace local_dbms.core
 
 		public List<Table> Tables => _tables;
 
+		public ITableController TableController => _tableController;
+
 		public SqliteDatabase(string name)
 		{
 			_tables = [];
@@ -49,9 +51,50 @@ namespace local_dbms.core
 			}
 		}
 
+		public bool CreateTable(Table table)
+		{
+			ValidateSqlIdentifier(table.Name);
+			if (_tables.Exists(t => t.Name == table.Name))
+				throw new DbmsException($"\"{table.Name}\": table with this name already exists!");
+
+			var (isValid, message) = table.ValidateColumns();
+			if (!isValid) throw new DbmsException(message);
+
+			var columns = table.Columns.Select((c) =>
+			{
+				ValidateSqlIdentifier(c.Name);
+				var columnDef = $"{c.Name} {c.TypeName}";
+				if (c.IsPk) columnDef += " PRIMARY KEY";
+				if (c.IsNotNull) columnDef += " NOT NULL";
+				if (c.DefaultValue != null) columnDef += $" DEFAULT ${c.Name}";
+
+				return columnDef;
+			});
+
+			var command = _connection.CreateCommand();
+			command.CommandText = $"CREATE TABLE {table.Name} ({string.Join(',', columns)});";
+
+            foreach (var column in table.Columns)
+			{
+				if (column.DefaultValue != null)
+					command.Parameters.AddWithValue($"${column.Name}", column.DefaultValue);
+			}
+
+			command.ExecuteNonQuery();
+            return true;
+		}
+
 		private void AddTable(Table table)
 		{
 			_tables.Add(table);
+		}
+
+		private void ValidateSqlIdentifier(string identifier)
+		{
+			if (string.IsNullOrWhiteSpace(identifier) || !System.Text.RegularExpressions.Regex.IsMatch(identifier, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+			{
+				throw new DbmsException($"Invalid SQL identifier: {identifier}");
+			}
 		}
 
 		public void Dispose()

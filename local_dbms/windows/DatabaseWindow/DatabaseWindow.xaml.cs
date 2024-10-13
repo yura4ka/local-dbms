@@ -29,24 +29,29 @@ namespace local_dbms.windows.DatabaseWindow
 		{
 			foreach (var table in _database.Tables)
 			{
-				var treeViewItem = new TreeViewItem
-				{
-					Header = table.Name,
-					Tag = table
-				};
-
-				foreach (var column in table.Columns)
-				{
-					var columnItem = new TreeViewItem
-					{
-						Header = column.Name,
-						Tag = column
-					};
-					treeViewItem.Items.Add(columnItem);
-				}
-
-				DatabaseTreeView.Items.Add(treeViewItem);
+				AddTableToTreeView(table);
 			}
+		}
+
+		private void AddTableToTreeView(Table table)
+		{
+			var treeViewItem = new TreeViewItem
+			{
+				Header = table.Name,
+				Tag = table
+			};
+
+			foreach (var column in table.Columns)
+			{
+				var columnItem = new TreeViewItem
+				{
+					Header = column.Name,
+					Tag = column
+				};
+				treeViewItem.Items.Add(columnItem);
+			}
+
+			DatabaseTreeView.Items.Add(treeViewItem);
 		}
 
 		private void DisplayTableData(Table selectedTable)
@@ -117,11 +122,24 @@ namespace local_dbms.windows.DatabaseWindow
 			}
 		}
 
-		private void AddButton_Click(object sender, RoutedEventArgs e)
+		private bool CreateTable(Table table)
+		{
+			bool isValid = _database.CreateTable(table);
+			if (isValid) AddTableToTreeView(table);
+			return isValid;
+		}
+
+		private void AddRowButton_Click(object sender, RoutedEventArgs e)
 		{
 			if (_tablePanelController.SelectedTable == null) return;
 			var dialog = new AddRowDialog(_tablePanelController.SelectedTable.Columns, _tablePanelController.AddRow);
 			dialog.ShowDialog();
 		}
-	}
+
+		private void AddTableButton_Click(object sender, RoutedEventArgs e)
+		{
+			var dialog = new AddTableDialog(_database.TableController, CreateTable);
+			dialog.ShowDialog();
+		}
+    }
 }

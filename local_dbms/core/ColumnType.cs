@@ -136,5 +136,7 @@
 			{ "COMPLEXINT", ComlexIntType.GetInstance },
 			{ "COMPLEXREAL", ComlexRealType.GetInstance },
 		};
+
+		public static List<string> AvailableTypes = ["Int", "Real", "Text", "Char", "ComplexInt", "ComplexReal"];
 	}
 }

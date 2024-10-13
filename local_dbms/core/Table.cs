@@ -1,6 +1,6 @@
 ﻿namespace local_dbms.core
 {
-	internal class Table
+	public class Table
 	{
 		private readonly ITableController _tableController;
 		private string _name;
@@ -22,6 +22,31 @@
 		public void AddColumn(Column column)
 		{
 			_columns.Add(column);
+		}
+
+		public (bool, string) ValidateColumns()
+		{
+			bool isPkFound = false;
+			var names = new HashSet<string>(_columns.Count);
+			foreach (var column in _columns)
+			{
+				if (string.IsNullOrEmpty(column.Name))
+					return (false, $"Invalid value for column name: \"{column.Name}\"!");
+				if (!names.Add(column.Name))
+					return (false, $"Column name is not unique: \"{column.Name}\"!");
+				if (column.IsPk)
+					isPkFound = true;
+				if (column.DefaultValue == null)
+					continue;
+				var defaultValueObject = column.Type.Instance(null, false);
+				if (!defaultValueObject.SetFromObject(column.DefaultValue))
+					return (false, $"\"{column.Name}\": invalid default value {defaultValueObject.StringValue} for type {column.Type.Name}!");
+			}
+
+			if (!isPkFound)
+				return (false, $"Table must have a primary key column!");
+
+			return (true, "");
 		}
 
 		public void GetAllRows()
