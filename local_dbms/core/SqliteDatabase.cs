@@ -42,7 +42,7 @@ namespace local_dbms.core
 					object? defaultValue = columnReader.IsDBNull(4) ? null : columnReader.GetValue(4);
 					bool isPrimaryKey = columnReader.GetBoolean(5);
 
-					var column = new Column(columnName, TypeManager.TypeMappings[columnType](), notNull, defaultValue, isPrimaryKey);
+					var column = new Column(columnName, TypeManager.TypeMappings[columnType.ToUpper()](), notNull, defaultValue, isPrimaryKey);
 					table.AddColumn(column);
 				}
 				AddTable(table);

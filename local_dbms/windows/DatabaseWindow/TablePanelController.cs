@@ -13,12 +13,11 @@ namespace local_dbms.windows.DatabaseWindow
 		{
 			SelectedTable = selectedTable;
 			selectedTable.GetAllRows();
-			Data.Columns.Clear();
-			Data.Rows.Clear();
+			Data = new DataTable();
 
 			foreach (var column in selectedTable.Columns)
 			{
-				string columnName = column.Name;
+				string columnName = column.Name.Replace("_", "__");
 				if (column.IsPk) columnName += " (pk)";
 				else if (column.IsNotNull) columnName += " (nn)";
 				Data.Columns.Add(columnName, typeof(string));

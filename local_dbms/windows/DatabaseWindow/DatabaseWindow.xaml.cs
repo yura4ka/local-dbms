@@ -55,6 +55,8 @@ namespace local_dbms.windows.DatabaseWindow
 			TableHeader.Text = selectedTable.Name;
 
 			_tablePanelController.SetTableData(selectedTable);
+			TableDataGrid.ItemsSource = _tablePanelController.Data.DefaultView;
+			TableDataGrid.Items.Refresh();
 		}
 
 		private void TableDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -67,7 +69,7 @@ namespace local_dbms.windows.DatabaseWindow
 
 			try
 			{
-				bool isValid = _tablePanelController.OnChange(rowIndex, columnIndex, newValue);
+				bool isValid = _tablePanelController.OnChange(rowIndex, columnIndex - 1, newValue);
 				if (!isValid) WindowUtils.ShowErrorMessage("Wrong value");
 			}
 			catch (Exception ex)
