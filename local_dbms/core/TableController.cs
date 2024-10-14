@@ -11,7 +11,7 @@ namespace local_dbms.core
 		public void DeleteRow(Table table, int row);
 	}
 
-	internal class SqliteTableController : ITableController
+	public class SqliteTableController : ITableController
 	{
 		private readonly SqliteConnection _connection;
 

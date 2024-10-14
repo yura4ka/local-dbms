@@ -1,8 +1,9 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.Text.RegularExpressions;
 
 namespace local_dbms.core
 {
-	internal class SqliteDatabase : IDatabase
+	public class SqliteDatabase : IDatabase
 	{
 		private readonly SqliteConnection _connection;
 		private readonly ITableController _tableController;
@@ -66,7 +67,7 @@ namespace local_dbms.core
 				var columnDef = $"{c.Name} {c.TypeName}";
 				if (c.IsPk) columnDef += " PRIMARY KEY";
 				if (c.IsNotNull) columnDef += " NOT NULL";
-				if (c.DefaultValue != null) columnDef += $" DEFAULT ${c.Name}";
+				if (c.DefaultValue != null) columnDef += $" DEFAULT {c.DefaultValue.ToString()}";
 
 				return columnDef;
 			});
@@ -74,13 +75,8 @@ namespace local_dbms.core
 			var command = _connection.CreateCommand();
 			command.CommandText = $"CREATE TABLE {table.Name} ({string.Join(',', columns)});";
 
-			foreach (var column in table.Columns)
-			{
-				if (column.DefaultValue != null)
-					command.Parameters.AddWithValue($"${column.Name}", column.DefaultValue);
-			}
-
 			command.ExecuteNonQuery();
+			_tables.Add(table);
 			return true;
 		}
 
@@ -100,7 +96,7 @@ namespace local_dbms.core
 
 		private void ValidateSqlIdentifier(string identifier)
 		{
-			if (string.IsNullOrWhiteSpace(identifier) || !System.Text.RegularExpressions.Regex.IsMatch(identifier, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+			if (string.IsNullOrWhiteSpace(identifier) || !Regex.IsMatch(identifier, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
 			{
 				throw new DbmsException($"Invalid SQL identifier: {identifier}");
 			}
