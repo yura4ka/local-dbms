@@ -62,6 +62,14 @@ namespace local_dbms.windows.DatabaseWindow
 			Data.Rows.RemoveAt(row);
 		}
 
+		public void DropTable()
+		{
+			if (SelectedTable == null) return;
+			SelectedTable = null;
+			Data.Columns.Clear();
+			Data.Rows.Clear();
+		}
+
 		private void AddDataRow(Row row)
 		{
 			var dataRow = Data.NewRow();

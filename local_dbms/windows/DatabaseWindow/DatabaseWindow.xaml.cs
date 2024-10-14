@@ -141,5 +141,32 @@ namespace local_dbms.windows.DatabaseWindow
 			var dialog = new AddTableDialog(_database.TableController, CreateTable);
 			dialog.ShowDialog();
 		}
+
+		private void DropTableButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (_tablePanelController.SelectedTable == null) return;
+			var result = MessageBox.Show("Are you sure you want to delete this table? This action cannot be undone.", "Delete table", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+			if (result != MessageBoxResult.Yes) return;
+
+			try
+			{
+				bool isValid = _database.DropTable(_tablePanelController.SelectedTable);
+				if (!isValid)
+				{
+					WindowUtils.ShowErrorMessage("Cannot drop this table");
+					return;
+				}
+				TablePanel.Visibility = Visibility.Collapsed;
+				ColumnPanel.Visibility = Visibility.Collapsed;
+				_tablePanelController.DropTable();
+				DatabaseTreeView.Items.Clear();
+				PopulateTreeView();
+
+			}
+			catch (Exception ex)
+			{
+				WindowUtils.ShowErrorMessage(ex.Message);
+			}
+		}
     }
 }

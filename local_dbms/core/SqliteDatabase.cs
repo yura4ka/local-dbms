@@ -74,14 +74,23 @@ namespace local_dbms.core
 			var command = _connection.CreateCommand();
 			command.CommandText = $"CREATE TABLE {table.Name} ({string.Join(',', columns)});";
 
-            foreach (var column in table.Columns)
+			foreach (var column in table.Columns)
 			{
 				if (column.DefaultValue != null)
 					command.Parameters.AddWithValue($"${column.Name}", column.DefaultValue);
 			}
 
 			command.ExecuteNonQuery();
-            return true;
+			return true;
+		}
+
+		public bool DropTable(Table table)
+		{
+			var command = _connection.CreateCommand();
+			command.CommandText = $"DROP TABLE {table.Name}";
+			command.ExecuteNonQuery();
+			_tables.Remove(table);
+			return true;
 		}
 
 		private void AddTable(Table table)
