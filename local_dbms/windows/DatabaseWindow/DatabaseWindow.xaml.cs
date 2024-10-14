@@ -85,9 +85,9 @@ namespace local_dbms.windows.DatabaseWindow
 
 		private void DisplayColumnData(Column selectedColumn)
 		{
-			ColumnPanel.Visibility = Visibility.Visible;
 			ColumnHeader.Text = selectedColumn.Name;
-			ColumnDetails.Text = $"Data Type: {selectedColumn.Type.Name}";
+			ColumnDetails.Text = $"Data Type:\t{selectedColumn.Type.Name}\nPrimary key (pk):\t{selectedColumn.IsPk}\nNot null (nn):\t{selectedColumn.IsNotNull}\nDefault value:\t{selectedColumn.DefaultValue?.ToString()}";
+			ColumnPanel.Visibility = Visibility.Visible;
 		}
 
 		private void DeleteRow_Click(object sender, RoutedEventArgs e)
