@@ -28,7 +28,10 @@ namespace local_dbms.windows.DatabaseWindow
 				columnValues[i] = c.Type.Instance(null, !c.IsNotNull);
 
 				var panel = new StackPanel { Orientation = Orientation.Horizontal };
-				panel.Children.Add(new TextBlock { Text = c.Name, Width = 250, Margin = new Thickness(5) });
+				string columnName = $"{c.Name} ({c.TypeName})";
+				if (c.IsPk) columnName += " (pk)";
+				if (c.IsNotNull) columnName += " (nn)";
+				panel.Children.Add(new TextBlock { Text = columnName, Width = 250, Margin = new Thickness(5) });
 
 				var inputBox = new TextBox { Width = 350, Margin = new Thickness(5), Text = c.DefaultValue?.ToString() ?? "" };
 				panel.Children.Add(inputBox);
