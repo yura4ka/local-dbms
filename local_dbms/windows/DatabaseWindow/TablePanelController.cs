@@ -1,5 +1,6 @@
 ﻿using local_dbms.core;
 using System.Data;
+using System.Text.RegularExpressions;
 
 namespace local_dbms.windows.DatabaseWindow
 {
@@ -12,16 +13,7 @@ namespace local_dbms.windows.DatabaseWindow
 		public void SetTableData(Table selectedTable)
 		{
 			SelectedTable = selectedTable;
-			selectedTable.GetAllRows();
-			Data = new DataTable();
-
-			foreach (var column in selectedTable.Columns)
-			{
-				string columnName = column.Name.Replace("_", "__");
-				if (column.IsPk) columnName += " (pk)";
-				else if (column.IsNotNull) columnName += " (nn)";
-				Data.Columns.Add(columnName, typeof(string));
-			}
+			CreateEmptyDataTable();
 
 			foreach (var row in selectedTable.Rows)
 			{
@@ -68,6 +60,57 @@ namespace local_dbms.windows.DatabaseWindow
 			SelectedTable = null;
 			Data.Columns.Clear();
 			Data.Rows.Clear();
+		}
+
+		public void Search(string query)
+		{
+			if (SelectedTable == null) return;
+
+			if (string.IsNullOrEmpty(query))
+			{
+				SetTableData(SelectedTable);
+				return;
+			}
+
+			Func<string, bool> searchFunc;
+			CreateEmptyDataTable();
+
+			try
+			{
+				var regex = new Regex(query);
+				searchFunc = (value) => regex.IsMatch(value);
+			} catch
+			{
+				string searchValue = query.ToLower();
+				searchFunc = (value) => value.Trim().ToLower().Contains(searchValue);
+			}
+
+			foreach (var row in SelectedTable.Rows)
+			{
+				foreach (var value in row)
+				{
+					if (searchFunc(value.StringValue))
+					{
+						AddDataRow(row);
+						break;
+					}
+				}
+			}
+		}
+
+		private void CreateEmptyDataTable()
+		{
+			if (SelectedTable == null) return;
+			SelectedTable.GetAllRows();
+			Data = new DataTable();
+
+			foreach (var column in SelectedTable.Columns)
+			{
+				string columnName = column.Name.Replace("_", "__");
+				if (column.IsPk) columnName += " (pk)";
+				else if (column.IsNotNull) columnName += " (nn)";
+				Data.Columns.Add(columnName, typeof(string));
+			}
 		}
 
 		private void AddDataRow(Row row)

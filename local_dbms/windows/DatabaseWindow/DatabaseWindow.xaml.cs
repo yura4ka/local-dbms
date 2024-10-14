@@ -168,5 +168,13 @@ namespace local_dbms.windows.DatabaseWindow
 				WindowUtils.ShowErrorMessage(ex.Message);
 			}
 		}
+
+		private void SearchButton_Click(object sender, RoutedEventArgs e)
+		{
+			string value = SearchInput.Text.Trim();
+			_tablePanelController.Search(value);
+			TableDataGrid.ItemsSource = _tablePanelController.Data.DefaultView;
+			TableDataGrid.Items.Refresh();
+		}
     }
 }
